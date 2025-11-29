@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Donation Tracking Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CDN -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+        .card {
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .card-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6c757d;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .page-title {
+            font-weight: 700;
+        }
+        .navbar-brand {
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            Donation Tracker
+        </a>
+        <span class="text-muted small">Cancer Awareness & Support</span>
+    </div>
+</nav>
+
+<div class="container mb-4">
+    <div class="row mb-3">
+        <div class="col">
+            <h2 class="page-title">Donation Dashboard</h2>
+            <p class="text-muted mb-0">Monitor total donations, donors and trends at a glance.</p>
+        </div>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card p-3">
+                <div class="card-body">
+                    <h6 class="card-title">Total Donations Received</h6>
+                    <div class="stat-value">
+                        ₹ {{ total_donations|floatformat:2 }}
+                    </div>
+                    <p class="text-muted mb-0 small">Sum of all recorded donations.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3">
+                <div class="card-body">
+                    <h6 class="card-title">Number of Donors</h6>
+                    <div class="stat-value">
+                        {{ num_donors }}
+                    </div>
+                    <p class="text-muted mb-0 small">Unique individuals who have donated.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart + Table -->
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card p-3">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Donation Trend</h6>
+                    <canvas id="donationChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card p-3">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Recent Donations</h6>
+                    <div class="table-responsive" style="max-height: 320px;">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Donor</th>
+                                    <th class="text-end">Amount (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in donations %}
+                                    <tr>
+                                        <td>{{ d.date }}</td>
+                                        <td>{{ d.donor_name }}</td>
+                                        <td class="text-end">{{ d.amount|floatformat:2 }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            No donations yet.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-muted small mt-2 mb-0">
+                        * Data shown here is dummy data generated for the assignment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const labels = JSON.parse('{{ labels|safe|escapejs }}');
+    const data = JSON.parse('{{ data|safe|escapejs }}');
+
+    const ctx = document.getElementById('donationChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Donations (₹)',
+                data: data,
+                fill: false,
+                tension: 0.3
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
